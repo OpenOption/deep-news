@@ -1,0 +1,13 @@
+# PyCharm-related files
+.idea/
+
+# Python Cache-related files
+__pycache__
+*.pyc
+
+# Swap files
+*.swp
+
+# Results of crawling
+results/
+
