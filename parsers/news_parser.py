@@ -23,8 +23,11 @@ class NewsParser(object):
         title_elem = soup.select_one('#articleTitle')
 
         if not title_elem:
-            self.logger.info('[Crawl::News Info] %s has no title!' % news_id_token)
-            return None
+            title_elem = soup.select_one("h2.end_tit")
+            
+            if not title_elem:
+                self.logger.info('[Crawl::News Info] %s has no title!' % news_id_token)
+                return None
 
         title = title_elem.get_text()
 
