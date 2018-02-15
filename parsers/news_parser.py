@@ -3,6 +3,7 @@ import re
 import requests
 
 from bs4 import BeautifulSoup
+from konlpy.tag import Twitter
 
 
 class NewsParser(object):
@@ -11,6 +12,7 @@ class NewsParser(object):
 
     def __init__(self, logger):
         self.logger = logger
+        self.twitter = Twitter()
 
     def parse(self, news_id_token):
         self.logger.info('[Crawl::News Info] Parsing info of %s' % news_id_token)
@@ -24,12 +26,12 @@ class NewsParser(object):
 
         if not title_elem:
             title_elem = soup.select_one("h2.end_tit")
-            
+
             if not title_elem:
                 self.logger.info('[Crawl::News Info] %s has no title!' % news_id_token)
                 return None
 
-        title = title_elem.get_text()
+        title = self.twitter.pos(title_elem.get_text(), norm=True, stem=True)
 
         api_req = requests.get("https://apis.naver.com/commentBox/cbox/web_naver_list_jsonp.json", params={
             "_callback": "cb",
