@@ -1,6 +1,7 @@
 import json
 import os
 
+from datetime import datetime
 from os import path
 from parsers.list_parser import NewsListParser
 from parsers.news_parser import NewsParser
@@ -21,7 +22,13 @@ if not path.exists("./results/news_list.json"):
     logger.info("Crawling news list.")
 
     list_parser = NewsListParser(logger)
-    parsed_list = list_parser.parse_until(args.limit)
+
+    if args.list_start:
+        start_date = datetime.strptime(args.list_start, "%Y%m%d")
+        parsed_list = list_parser.parse_until(args.limit, start_date)
+
+    else:
+        parsed_list = list_parser.parse_until(args.limit)
 
     f = open("./results/news_list.json", 'w')
     f.write(json.dumps(parsed_list))
