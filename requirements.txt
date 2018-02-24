@@ -1,3 +1,5 @@
+gensim
+keras
 beautifulsoup4==4.6.0
 blinker==1.3
 certifi==2018.1.18
