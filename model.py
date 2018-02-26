@@ -72,10 +72,10 @@ def train():
     output = Dense(5, activation='softmax')(y)
     output2 = Dense(2, activation='softmax')(y)
 
-    model = Model(input=x, output=[output, output2])
+    model = Model(inputs=[x], outputs=[output, output2])
     model.compile(loss='categorical_crossentropy', optimizer='adam')
 
-    model.fit(x_train, [y_train, y_train2], batch_size=20, epochs=10, verbose=1, callbacks=[
+    model.fit([x_train], [y_train, y_train2], batch_size=20, epochs=100, verbose=1, callbacks=[
         TensorBoard(log_dir='./results/logs/model')
     ])
 
