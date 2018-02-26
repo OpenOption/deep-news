@@ -9,18 +9,16 @@ from utils.arguments import get_arguments
 from utils.logger import get_logger
 
 
-def parse():
-    args = get_arguments()
+def run(args):
     logger = get_logger()
 
-    if args.no_crawl:
-        return
+    news_list_path = "./results/news/%s/news_list.json" % args.target
 
-    if args.list_crawl_again and path.exists("./results/news_list.json"):
-        os.remove("./results/news_list.json")
+    if args.list_crawl_again and path.exists(news_list_path):
+        os.remove(news_list_path)
 
-    if not path.exists("./results/news_list.json"):
-        logger.info("Crawling news list.")
+    if not path.exists(news_list_path):
+        logger.info("[Crawl::News List] Crawling news list.")
 
         list_parser = NewsListParser(logger)
 
@@ -31,24 +29,24 @@ def parse():
         else:
             parsed_list = list_parser.parse_until(args.limit)
 
-        f = open("./results/news_list.json", 'w')
+        f = open(news_list_path, 'w')
         f.write(json.dumps(parsed_list))
         f.close()
 
     else:
-        logger.info("Using existing news list. Please add --list-crawl flag to re-crawl")
+        logger.info("[Crawl] Using existing news list. Please add --force flag to re-crawl")
 
     news_crawler = NewsParser(logger)
 
-    f = open("./results/news_list.json", 'r')
+    f = open(news_list_path, 'r')
     news_list = json.loads(f.read())
     f.close()
 
     for news in news_list:
-        file_location = "./results/news/%s.json" % news
+        file_location = "./results/news/%s/%s.json" % (args.target, news)
 
         if path.exists(file_location):
-            logger.info("Skipping already crawled news: %s" % news)
+            logger.info("[Crawl::News Info] Skipping already crawled news: %s" % news)
             continue
 
         news_info = news_crawler.parse(news)
