@@ -1,5 +1,6 @@
 import argparse
 import re
+import sys
 
 
 def date_type(s):
@@ -39,7 +40,7 @@ def get_arguments():
 
     crawl_parser.add_argument(
         "--start", type=date_type, help='Start crawling news list from this date',
-        dest='list_start', metavar='date'
+        dest='list_start', metavar='[date]'
     )
 
     crawl_parser.add_argument(
@@ -64,5 +65,9 @@ def get_arguments():
     )
 
     args = arg_parser.parse_args()
+
+    if 'which' not in args:
+        arg_parser.print_help()
+        sys.exit(2)
 
     return args

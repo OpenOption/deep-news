@@ -8,7 +8,7 @@ import json
 
 
 def run(args):
-    news_list = os.listdir('./results/news/train')
+    news_list = os.listdir('./results/dataset/train')
     logger = get_logger()
 
     if len(news_list) < 1:
@@ -18,7 +18,7 @@ def run(args):
     news = news_list[0]
 
     if args.check_lstm:
-        f = open('./results/news/train/%s' % news, 'r')
+        f = open('./results/dataset/train/%s' % news, 'r')
         obj = json.loads(f.read())
         f.close()
 
@@ -35,7 +35,7 @@ def run(args):
             logger.debug("[Analyze::Check LSTM]", orig_sentence[i], input_gate, forget_gate, output_gate)
             i += 1
 
-        model = load_model('my_model.h5')
+        model = load_model('./results/models/news.h5')
         lstm = model.get_layer("lstm")
         lstm.cell.call = create_viewer(get_callback)
         model.predict(sentence)

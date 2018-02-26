@@ -12,7 +12,7 @@ from utils.logger import get_logger
 def run(args):
     logger = get_logger()
 
-    news_list_path = "./results/news/%s/news_list.json" % args.target
+    news_list_path = "./results/dataset/news_list_%s.json" % args.target
 
     if args.list_crawl_again and path.exists(news_list_path):
         os.remove(news_list_path)
@@ -43,7 +43,7 @@ def run(args):
     f.close()
 
     for news in news_list:
-        file_location = "./results/news/%s/%s.json" % (args.target, news)
+        file_location = "./results/dataset/%s/%s.json" % (args.target, news)
 
         if path.exists(file_location):
             logger.info("[Crawl::News Info] Skipping already crawled news: %s" % news)
