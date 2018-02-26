@@ -27,6 +27,11 @@ def get_arguments():
         dest='list_start', type=date_type
     )
 
+    arg_parser.add_argument(
+        "--no-crawl", help='Does not crawl when this flag is active and just start to train',
+        dest='no_crawl', action='store_true'
+    )
+
     args = arg_parser.parse_args()
 
     return args

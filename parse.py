@@ -13,6 +13,9 @@ def parse():
     args = get_arguments()
     logger = get_logger()
 
+    if args.no_crawl:
+        return
+
     if args.list_crawl_again and path.exists("./results/news_list.json"):
         os.remove("./results/news_list.json")
 
