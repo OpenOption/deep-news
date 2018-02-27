@@ -41,7 +41,14 @@ def run(args):
     news_list = json.loads(f.read())
     f.close()
 
-    for news in news_list:
+    start_index = 0
+
+    if args.info_start:
+        start_index = news_list.index(args.info_start)
+
+    for news_index in range(start_index, len(news_list)):
+        news = news_list[news_index]
+
         file_location = "./results/dataset/%s/%s.json" % (args.target, news)
 
         if path.exists(file_location):

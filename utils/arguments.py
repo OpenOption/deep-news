@@ -18,6 +18,14 @@ def dataset_type(s):
     return s
 
 
+def news_type(s):
+    news_pattern = re.compile(r"^[0-9]{3},[0-9]{10}")
+    if not news_pattern.match(s):
+        raise argparse.ArgumentTypeError
+
+    return s
+
+
 def get_arguments():
     arg_parser = argparse.ArgumentParser(
         description='A LSTM model to predict news-related information by naver news dataset.'
@@ -39,8 +47,13 @@ def get_arguments():
     )
 
     crawl_parser.add_argument(
-        "--start", type=date_type, help='Start crawling news list from this date',
+        "--list-start", type=date_type, help='Start crawling news list from this date',
         dest='list_start', metavar='[date]'
+    )
+
+    crawl_parser.add_argument(
+        "--info-start", type=news_type, help='Start crawling news info from this oid,aid',
+        dest='info_start', metavar='[oid,aid]'
     )
 
     crawl_parser.add_argument(
