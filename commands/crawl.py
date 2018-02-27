@@ -5,7 +5,6 @@ from datetime import datetime
 from os import path
 from parsers.list_parser import NewsListParser
 from parsers.news_parser import NewsParser
-from utils.arguments import get_arguments
 from utils.logger import get_logger
 
 
