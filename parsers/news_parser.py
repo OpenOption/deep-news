@@ -15,8 +15,6 @@ class NewsParser(object):
         self.twitter = Twitter()
 
     def parse(self, news_id_token):
-        self.logger.info('[Crawl::News Info] Parsing info of %s' % news_id_token)
-
         split = news_id_token.split(',')
         href = NewsParser.news_link % tuple(split)
         req = requests.get(href)

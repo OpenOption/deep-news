@@ -46,8 +46,12 @@ def run(args):
     if args.info_start:
         start_index = news_list.index(args.info_start)
 
+    total_amount = len(news_list) - start_index
+
     for news_index in range(start_index, len(news_list)):
         news = news_list[news_index]
+
+        logger.info('[Crawl::News Info] Parsing info of %s (%d / %d)' % (news, news_index, total_amount))
 
         file_location = "./results/dataset/%s/%s.json" % (args.target, news)
 
@@ -63,4 +67,3 @@ def run(args):
         file = open(file_location, "w")
         file.write(json.dumps(news_info))
         file.close()
-
