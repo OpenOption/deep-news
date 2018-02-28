@@ -6,6 +6,7 @@ from utils.logger import get_logger
 from utils.lstm_viewer import create_viewer
 
 import numpy as np
+import matplotlib.pyplot as plt
 import os
 import json
 
@@ -31,6 +32,9 @@ def run(args):
     sentence = list(map(lambda word: "{}/{}".format(*word), orig_sentence + obj['content']))
 
     x_set = np.array(pad_sequences(bind_word([sentence], word2vec), maxlen=20))
+
+    if args.check_word_diff:
+        print(np.shape(x_set))
 
     if args.check_lstm:
         i = 0

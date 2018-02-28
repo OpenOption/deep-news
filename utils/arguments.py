@@ -77,6 +77,11 @@ def get_arguments():
         dest='check_lstm', action='store_true'
     )
 
+    analyze_parser.add_argument(
+        "--check-word-diff", help='Check delta of words',
+        dest='check_word_diff', action='store_true'
+    )
+
     args = arg_parser.parse_args()
 
     if 'which' not in args:

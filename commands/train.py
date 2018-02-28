@@ -64,11 +64,12 @@ def process_data(dataset, dataset_label):
 
 def run(args):
     logger = get_logger()
+    seq_size = 10000
 
     # Creating news model
     logger.info("[Fit] Generating model...")
 
-    x = Input(shape=(20, 50))
+    x = Input(shape=(seq_size, 50))
     lstm_layer = LSTM(20, activation='relu', name='lstm', dropout=0.2)
     lstm = lstm_layer(x)
 
@@ -119,11 +120,11 @@ def run(args):
 
     # Preprocess input, outputs
     logger.info("[Fit] Preprocessing train dataset...")
-    x_train = np.array(pad_sequences(bind_word(x_train, w_model), maxlen=20))
+    x_train = np.array(pad_sequences(bind_word(x_train, w_model), maxlen=seq_size))
     y_train = list(map(np.array, y_train))
 
     logger.info("[Fit] Preprocessing test dataset...")
-    x_test = np.array(pad_sequences(bind_word(x_test, w_model), maxlen=20))
+    x_test = np.array(pad_sequences(bind_word(x_test, w_model), maxlen=seq_size))
     y_test = list(map(np.array, y_test))
 
     # Fit the model
