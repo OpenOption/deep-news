@@ -3,9 +3,10 @@ import numpy as np
 from gensim.models import Word2Vec
 
 from keras.callbacks import TensorBoard
-from keras.layers import Input, LSTM, Dense
-from keras.models import Model
+from keras.layers import Input, LSTM, Dense, Dropout
+from keras.models import Model, Sequential
 from keras.preprocessing.sequence import pad_sequences
+from utils.bind_word import bind_word
 from utils.logger import get_logger
 
 import json
@@ -62,8 +63,40 @@ def process_data(dataset, dataset_label):
 
 
 def run(args):
-    # Reading parsed news
     logger = get_logger()
+
+    # Creating news model
+    logger.info("[Fit] Generating model...")
+
+    x = Input(shape=(20, 50))
+    lstm_layer = LSTM(20, activation='relu', name='lstm', dropout=0.2)
+    lstm = lstm_layer(x)
+
+    shared_model_output = lstm_layer.output_shape
+
+    age_model = Sequential([
+        Dense(10, activation='relu', name='dense_age', input_shape=shared_model_output),
+        Dropout(0.3, name='dropout_age'),
+        Dense(5, activation='softmax', name='output_age')
+    ])(lstm)
+
+    gender_model = Sequential([
+        Dense(10, activation='relu', name='dense_gender', input_shape=shared_model_output),
+        Dropout(0.3, name='dropout_gender'),
+        Dense(2, activation='softmax', name='output_gender')
+    ])(lstm)
+
+    count_model = Sequential([
+        Dense(10, activation='relu', name='dense_count', input_shape=shared_model_output),
+        Dense(10, activation='relu', name='dense_count_2'),
+        Dropout(0.3, name='dropout_count'),
+        Dense(2, activation='sigmoid', name='output_count')
+    ])(lstm)
+
+    model = Model(inputs=[x], outputs=[age_model, gender_model, count_model])
+    model.compile(loss='categorical_crossentropy', optimizer='adam')
+
+    # Reading parsed news
 
     logger.info("[Fit] Reading parsed dataset...")
     news_list = os.listdir('./results/dataset/train')
@@ -84,47 +117,21 @@ def run(args):
         logger.info("[Fit] Reading from saved word2vec model...")
         w_model = Word2Vec.load("./results/models/word2vec.txt")
 
-    def bind_word(sentences):
-        for sentence_index in range(0, len(sentences)):
-            sentences[sentence_index] = list(filter(
-                lambda word: word in w_model.wv.vocab,
-                sentences[sentence_index]
-            ))
-
-            for word_index in range(0, len(sentences[sentence_index])):
-                original_text = sentences[sentence_index][word_index]
-
-                sentences[sentence_index][word_index] = w_model[original_text]
-
-        return sentences
-
     # Preprocess input, outputs
     logger.info("[Fit] Preprocessing train dataset...")
-    x_train = np.array(pad_sequences(bind_word(x_train), maxlen=20))
+    x_train = np.array(pad_sequences(bind_word(x_train, w_model), maxlen=20))
     y_train = list(map(np.array, y_train))
 
     logger.info("[Fit] Preprocessing test dataset...")
-    x_test = np.array(pad_sequences(bind_word(x_test), maxlen=20))
+    x_test = np.array(pad_sequences(bind_word(x_test, w_model), maxlen=20))
     y_test = list(map(np.array, y_test))
 
-    # Creating news model
-    logger.info("[Fit] Generating model...")
-    x = Input(shape=(20, 50))
-    y = LSTM(20, activation='relu', name='lstm')(x)
-    dense_ratio = Dense(10, activation='relu')(y)
-    output_age = Dense(5, activation='softmax')(dense_ratio)
-    output_gender = Dense(2, activation='softmax')(dense_ratio)
-
-    dense_count = Dense(10, activation='relu')(y)
-    output_count = Dense(2, activation='sigmoid')(dense_count)
-
-    model = Model(inputs=[x], outputs=[output_age, output_gender, output_count])
-    model.compile(loss='categorical_crossentropy', optimizer='adam')
-
+    # Fit the model
+    logger.info("[Fit] Fitting the model...")
     model.fit(
         [x_train], y_train,
         validation_data=([x_test], y_test),
-        batch_size=20, epochs=args.epoch, verbose=1,
+        batch_size=128, epochs=args.epoch, verbose=1,
         callbacks=[TensorBoard(log_dir='./results/logs/model')]
     )
 
