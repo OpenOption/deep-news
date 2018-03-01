@@ -66,12 +66,32 @@ def get_arguments():
     train_parser.set_defaults(which='train')
     train_parser.add_argument(
         "epoch", type=int, help='Epochs used in training',
-        default=100, nargs='?'
+        default=20, nargs='?'
+    )
+
+    train_parser.add_argument(
+        "--seq-size", type=int, help='Sequence size (max words)',
+        default=1500, dest='seq_size'
+    )
+
+    train_parser.add_argument(
+        "--batch-size", type=int, help='Batch size',
+        default=128, dest='batch_size'
+    )
+
+    train_parser.add_argument(
+        "--no-particles", help='Remove Josa, Eomi, KoreanParticles from sequence.',
+        dest='no_particles', action='store_true'
     )
 
     # Analyzing sub commands
     analyze_parser = sub_parser.add_parser('analyze', help='A cutting edge command to check if the model works.')
     analyze_parser.set_defaults(which='analyze')
+    analyze_parser.add_argument(
+        "checking_sentence", type=str, help='Sentence to analyze',
+        metavar='sentence', nargs='?'
+    )
+
     analyze_parser.add_argument(
         "--check-lstm", help='Check value of LSTM Gates.',
         dest='check_lstm', action='store_true'

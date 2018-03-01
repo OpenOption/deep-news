@@ -1,4 +1,5 @@
-import numpy as np
+
+from functools import reduce
 
 from gensim.models import Word2Vec
 
@@ -6,15 +7,29 @@ from keras.callbacks import TensorBoard
 from keras.layers import Input, LSTM, Dense, Dropout
 from keras.models import Model, Sequential
 from keras.preprocessing.sequence import pad_sequences
+
+from os import path
+
 from utils.bind_word import bind_word
 from utils.logger import get_logger
 
 import json
 import os
-from os import path
+import numpy as np
 
 
-def process_data(dataset, dataset_label):
+def filter_map_word(no_particles):
+    def applicator(prev, curr):
+        if no_particles and curr[1] in ["Josa", "Eomi", "Punctuation", "KoreanParticle"]:
+            return prev
+
+        prev.append("{}/{}".format(*curr))
+        return prev
+
+    return applicator
+
+
+def process_data(args, dataset, dataset_label):
     x_set = []
     y_set = [[], [], []]
     logger = get_logger()
@@ -29,10 +44,10 @@ def process_data(dataset, dataset_label):
             gender = obj['gender']
 
             sentence = obj['title']
-            sentence = list(map(lambda word: "{}/{}".format(*word), sentence))
+            sentence = list(reduce(filter_map_word(args.no_particles), sentence, []))
 
             content = obj['content']
-            content = list(map(lambda word: "{}/{}".format(*word), content))
+            content = list(reduce(filter_map_word(args.no_particles), content, []))
 
             x_set.append(sentence + content)
             y_set[0].append([
@@ -64,7 +79,11 @@ def process_data(dataset, dataset_label):
 
 def run(args):
     logger = get_logger()
-    seq_size = 10000
+
+    seq_size = args.seq_size
+    batch_size = args.batch_size
+
+    logger.info("[Fit] Using sequence size %d, batch size %d" % (seq_size, batch_size))
 
     # Creating news model
     logger.info("[Fit] Generating model...")
@@ -103,8 +122,8 @@ def run(args):
     news_list = os.listdir('./results/dataset/train')
     news_test_list = os.listdir('./results/dataset/test')
 
-    [x_train, y_train] = process_data(news_list, "train")
-    [x_test, y_test] = process_data(news_test_list, "test")
+    [x_train, y_train] = process_data(args, news_list, "train")
+    [x_test, y_test] = process_data(args, news_test_list, "test")
     logger.info("[Fit] Done reading %d train set & %d test sets!" % (len(x_train), len(x_test)))
 
     # Creating Word embedding model
@@ -132,7 +151,7 @@ def run(args):
     model.fit(
         [x_train], y_train,
         validation_data=([x_test], y_test),
-        batch_size=128, epochs=args.epoch, verbose=1,
+        batch_size=batch_size, epochs=args.epoch, verbose=1,
         callbacks=[TensorBoard(log_dir='./results/logs/model')]
     )
 
